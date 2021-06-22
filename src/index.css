@@ -1,0 +1,51 @@
+
+.App {
+  font-family: sans-serif;
+}
+
+body {
+  font-family: sans-serif;
+}
+
+label {
+  display: inline-block;
+  width: 100px;
+  margin-bottom: 20px;
+}
+
+textarea,
+input {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+label {
+  display: inline-block;
+  width: 100px;
+  margin-bottom: 20px;
+}
+
+input[type="submit"],
+button[type="submit"] {
+  display: block;
+  appearance: none;
+  background: #333;
+  color: white;
+  border: none;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  border-radius: 4px;
+}
+
+.reactSelect {
+  margin: 20px 0;
+}
+
+.reactSelectLabel {
+  margin-bottom: 0px;
+  display: block;
+}
+
