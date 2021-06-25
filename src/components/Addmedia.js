@@ -13,14 +13,74 @@ const Buffer = require('buffer/').Buffer
 
 export default class AddMedia extends React.Component {
 
+  settingData;
 
   constructor () {
+
   super();
+   this.onChangeApiport = this.onChangeApiport.bind(this);
+   this.onChangeGatewayport = this.onChangeGatewayport.bind(this);
+   this.onChangeRemoteipaddress = this.onChangeRemoteipaddress.bind(this);
+   this.onChangeLocalipaddress = this.onChangeLocalipaddress.bind(this);
+   this.connectTonetwork = this.connectTonetwork.bind(this);
+
   this.state = {
-            activeIndex: 1
-        }
+            activeIndex: 1,
+            uploadstatus: 1
+        };
+
+  this.state = {
+            remoteipaddress: '1.1.1.1',
+            localipaddress: '127.0.0.1',
+            apiport: '5001',
+            gatewayport: '8080',
+            httptype: 'http',
+  };
+
+
+
  this.config = {} // set to your IPFS host, port, etc
     this.ipfsApi = IpfsApi(this.config)
+
+  }
+
+  componentDidMount() {
+        this.settingData = JSON.parse(localStorage.getItem('settingdata'));
+
+        if (localStorage.getItem('settingdata')) {
+            this.setState({
+                apiport: this.settingData.apiport,
+            })
+        } else {
+            this.setState({
+            apiport: '5001',
+            })
+        }
+    }
+
+   componentWillUpdate(nextProps, nextState) {
+        localStorage.setItem('settingdata', JSON.stringify(nextState));
+    }
+
+
+  onChangeApiport(e) {
+        this.setState({ apiport: e.target.value })
+  }
+
+  onChangeGatewayport(e) {
+        this.setState({ gatewayport: e.target.value })
+  }
+
+  onChangeRemoteipaddress(e) {
+        this.setState({ remoteipaddress: e.target.value })
+  }
+
+  onChangeLocalipaddress(e) {
+        this.setState({ localipaddress: e.target.value })
+  }
+  
+  connectTonetwork() {
+
   }
 
   captureFile = (event) => {
@@ -40,6 +100,7 @@ export default class AddMedia extends React.Component {
     .then((response) => {
       ipfsId = response[0].Hash
       console.log(ipfsId)
+      this.setState({ uploadstatus: ipfsId  })
     })
   }
 
@@ -58,12 +119,21 @@ export default class AddMedia extends React.Component {
     </div>
     <div className="p-col-6 p-md-4"> 
    <div className="p-fluid">
-    <Card style={{ width: '25rem', height: '25rem', marginBottom: '2em' }}> 
+    <Card style={{ width: '25rem', height: '15rem', marginBottom: '2em' }}> 
       Upload here
       <form id="captureMedia" onSubmit={this.handleSubmit}>
         <input type="file" onChange={this.captureFile} />
       </form>
     </Card> 
+    <Card style={{ width: '25rem', height: '10rem', marginBottom: '2em' }}> 
+      Uploaded status
+
+      <p> {this.state.uploadstatus  } </p>
+
+    </Card> 
+      <Card style={{ width: '25rem', height: '15rem', marginBottom: '2em' }}> 
+      List of files
+      </Card>
     </div>
     </div>
 
@@ -77,11 +147,11 @@ export default class AddMedia extends React.Component {
                     <TabPanel header="Remote node ">
    <div className="p-field p-grid">
     <div className="p-col p-col-9">
-        <InputText id="firstname3" type="text"/>
-      <small id="username-help">Enter your username to reset your password.</small>
+        <InputText id="remoteipaddress" type="text" value={this.state.remoteipaddress} />
+      <small id="username-help"> Node {this.state.remoteipaddress } .</small>
     </div>
     <div className="p-col-fixed p-col-3">
-        <InputText id="apiport" type="text"/>
+        <InputText id="apiport" type="text"value={this.state.apiport}/>
       <small id="username-apiport">API port </small>
     </div>
 </div>
@@ -90,7 +160,7 @@ export default class AddMedia extends React.Component {
     </div>
 
     <div className="p-col-fixed p-col-3">
-        <InputText id="gatewayport" type="text"/>
+        <InputText id="gatewayport" type="text" value={this.state.gatewayport} />
       <small id="username-gatewayport">Gateway port </small>
     </div>
 
@@ -100,10 +170,10 @@ export default class AddMedia extends React.Component {
     <div className="p-col p-col-1">
     </div>
     <div className="p-col p-col-4">
-       <Button onClick={() => this.setState({ activeIndex: 1 }) } className="p-button-text" label="HTTPS" />
+       <Button onClick={() => this.setState({ httptype: 'https' }) } className="p-button-text" label="HTTPS" />
     </div>
     <div className="p-col p-col-4">
-       <Button onClick={() => this.setState({ activeIndex: 1 }) } className="p-button-text" label="HTTP" />
+       <Button onClick={() => this.setState({ httptype: 'http' }) } className="p-button-text" label="HTTP" />
 
     </div>
     <div className="p-col p-col-3">
@@ -116,7 +186,7 @@ export default class AddMedia extends React.Component {
     <div className="p-col p-col-1">
     </div>
     <div className="p-col p-col-8">
-       <Button onClick={() => this.setState({ activeIndex: 1 }) } className="p-button-text"  label="Node online" />
+       <Button onClick={() => this.connectTonetwork() }  className="p-button-text"  label="Node online" />
     </div>
 
     <div className="p-col p-col-3">
@@ -131,11 +201,11 @@ export default class AddMedia extends React.Component {
 
    <div className="p-field p-grid">
     <div className="p-col p-col-9">
-        <InputText id="firstname3" type="text"/>
-      <small id="username-help">Enter your username to reset your password.</small>
+        <InputText id="localipaddress" type="text" value={this.state.localipaddress} />
+      <small id="username-help"> Node {this.state.localipaddress} </small>
     </div>
     <div className="p-col-fixed p-col-3">
-        <InputText id="apiport" type="text"/>
+        <InputText id="apiport" type="text" value={this.state.apiport} />
       <small id="username-apiport">API port </small>
     </div>
 </div>
@@ -144,7 +214,7 @@ export default class AddMedia extends React.Component {
     </div>
 
     <div className="p-col-fixed p-col-3">
-        <InputText id="gatewayport" type="text"/>
+        <InputText id="gatewayport" type="text" value={this.state.gatewayport} />
       <small id="username-gatewayport">Gateway port </small>
     </div>
 
@@ -154,10 +224,10 @@ export default class AddMedia extends React.Component {
     <div className="p-col p-col-1">
     </div>
     <div className="p-col p-col-4">
-       <Button onClick={() => this.setState({ activeIndex: 1 }) } className="p-button-text" label="HTTPS" />
+       <Button onClick={() => this.setState({ httptype: 'https' }) } className="p-button-text" label="HTTPS" />
     </div>
     <div className="p-col p-col-4">
-       <Button onClick={() => this.setState({ activeIndex: 1 }) } className="p-button-text" label="HTTP" />
+       <Button onClick={() => this.setState({ httptype: 'http' }) } className="p-button-text" label="HTTP" />
 
     </div>
     <div className="p-col p-col-3">
@@ -184,18 +254,24 @@ export default class AddMedia extends React.Component {
             </div>
   </Card>
 
+    <Card style={{ width: '25rem', height: '15rem', marginBottom: '2em' }}> 
+     Enter file hash and save
+        <InputText id="filehashtoshave" type="text" value={this.state.ipfsfilehash} />
+      <small id="username-gatewayport">IPFS file hash  </small>
+
+       <Button onClick={() => this.setState({ httptype: 'https' }) } className="p-button-text" label="Save" />
+    </Card>
+
+
+
    </div>
 
 
     <div className="p-md-2"> 
     </div>
 
-   <div className="p-fluid">
- </div>
-
     </div>
-    <div className="p-col-6">6</div>
-    <div className="p-col-6">6</div>
+
 </div>
    
     )

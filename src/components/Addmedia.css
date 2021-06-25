@@ -18,9 +18,11 @@
 .p-button {
     margin-right: 0.5rem;
     text-align: center;
-    
+    box-shadow: 0 0 0 1px var(--green-400);
 }
 
-
+.p-button:focus {
+    background-color: var(--indigo-700);
+}
 
 
