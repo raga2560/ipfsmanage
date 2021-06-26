@@ -20,6 +20,7 @@ export default class AddMedia extends React.Component {
 
   super();
    this.savestate = this.savestate.bind(this);
+   this.createapi = this.createapi.bind(this);
    this.onChangeLocalRemote = this.onChangeLocalRemote.bind(this);
    this.onChangeRemoteipaddress = this.onChangeRemoteipaddress.bind(this);
    this.onChangeLocalipaddress = this.onChangeLocalipaddress.bind(this);
@@ -29,8 +30,12 @@ export default class AddMedia extends React.Component {
             activeIndex: 1,
             uploadstatus: 1,
             localmode: false,
-            localnetworkstatus: false,
-            remotenetworkstatus: false,
+            localnetworkstatus: true,
+            remotenetworkstatus: true,
+            remoteapi: '',
+            localapi: '',
+            localgateway: '',
+            remotegateway: '',
             ipfsfilehash: ''
         };
 
@@ -48,10 +53,16 @@ export default class AddMedia extends React.Component {
 
 
    this.localconfig = {} // set to your IPFS host, port, etc
-   this.remoteconfig = {} // set to your IPFS host, port, etc
+   this.remoteconfig =  "/ip4/3.249.193.188/tcp/5001";
+//      "Gateway": "/ip4/54.169.57.146/tcp/8081"
 
-    this.localipfsApi = IpfsApi(this.localconfig)
-    this.remoteipfsApi = IpfsApi(this.remoteconfig)
+    this.state = {
+      localipfsApi : {},
+      remoteipfsApi: {}
+    };
+
+    //this.localipfsApi = IpfsApi(this.localconfig)
+    // this.remoteipfsApi = IpfsApi(this.remoteconfig)
 
   }
 
@@ -61,7 +72,9 @@ export default class AddMedia extends React.Component {
 
         if (localStorage.getItem('settingdata')) {
             this.setState({
+                localipaddress: this.settingData.localipaddress,
                 localapiport: this.settingData.localapiport,
+                remoteipaddress: this.settingData.remoteipaddress,
                 remoteapiport: this.settingData.remoteapiport,
                 localgatewayport: this.settingData.localgatewayport,
                 remotegatewayport: this.settingData.remotegatewayport,
@@ -70,6 +83,8 @@ export default class AddMedia extends React.Component {
             })
         } else {
             this.setState({
+                localipaddress: '127.0.0.1',
+                remoteipaddress: '1.1.1.1',
                 localapiport: '5001',
                 remoteapiport: '5001',
                 localgatewayport: '8080',
@@ -78,6 +93,7 @@ export default class AddMedia extends React.Component {
                 remotehttptype: 'http',
             })
         }
+        this.createapi();
     }
 
    componentWillUpdate(nextProps, nextState) {
@@ -92,25 +108,45 @@ export default class AddMedia extends React.Component {
 
   onChangeLocalRemote(e) {
    this.setState({activeIndex: e.index});
-
+   console.log(e.index );
    if(e.index == 0) {
-   this.setState({ localmode: true })
-   } else {
    this.setState({ localmode: false })
+   } else {
+   this.setState({ localmode: true })
    }
 
+   this.createapi();
+  }
+
+  createapi() {
+
+    let localapi = '/ip4/' + this.state.localipaddress + '/tcp/'+ this.state.localapiport ;
+    let remoteapi = '/ip4/' + this.state.remoteipaddress + '/tcp/'+ this.state.remoteapiport ;
+    let remotegateway = this.state.remotehttptype + "://"+ this.state.remoteipaddress+ ":" + this.state.remotegatewayport;
+    let localgateway = this.state.localhttptype + "://"+ this.state.localipaddress+ ":" + this.state.localgatewayport;
+
+    this.setState({ localapi: localapi })
+    this.setState({ remoteapi: remoteapi })
+    this.setState({ remotegateway: remotegateway })
+    this.setState({ localgateway: localgateway })
   }
 
   onChangeRemoteipaddress(e) {
-        this.setState({ remoteipaddress: e.target.value })
+     this.setState({ remoteipaddress: e.target.value })
+     this.createapi();
   }
 
   onChangeLocalipaddress(e) {
      this.setState({ localipaddress: e.target.value })
+     this.createapi();
   }
   
   connectTonetwork() {
    this.setState({remotenetworkstatus: !this.state.remotenetworkstatus});
+    let remoteapi =  IpfsApi(this.state.remoteapi);
+    let localapi =  IpfsApi(this.state.localapi);
+    this.setState({remoteipfsApi:  remoteapi}) ;
+    this.setState({localipfsApi:  localapi}) ;
   }
 
   captureFile = (event) => {
@@ -118,7 +154,11 @@ export default class AddMedia extends React.Component {
     event.preventDefault()
     const file = event.target.files[0]
     let reader = new FileReader()
-    reader.onloadend = () => this.saveToIpfs(reader)
+    if(this.state.localmode == true) {
+      reader.onloadend = () => this.saveToLocalIpfs(reader)
+    } else {
+      reader.onloadend = () => this.saveToRemoteIpfs(reader)
+    }
     reader.readAsArrayBuffer(file)
   }
 
@@ -126,11 +166,16 @@ export default class AddMedia extends React.Component {
     // console.log(this.arrayBufferToString(reader.result))
     let ipfsId
     const buffer = Buffer.from(reader.result)
-    this.remoteipfsApi.add(buffer)
+    let remoteapi =  IpfsApi(this.state.remoteapi);
+    remoteapi.add(buffer)
     .then((response) => {
-      ipfsId = response[0].Hash
+      console.log(JSON.stringify(response));
+      ipfsId = response[0].hash
       console.log(ipfsId)
       this.setState({ uploadstatus: ipfsId  })
+    }).catch(err => {
+
+      console.log(JSON.stringify(err));
     })
   }
 
@@ -138,7 +183,7 @@ export default class AddMedia extends React.Component {
     // console.log(this.arrayBufferToString(reader.result))
     let ipfsId
     const buffer = Buffer.from(reader.result)
-    this.localipfsApi.add(buffer)
+    this.state.localipfsApi.add(buffer)
     .then((response) => {
       ipfsId = response[0].Hash
       console.log(ipfsId)
@@ -161,7 +206,15 @@ export default class AddMedia extends React.Component {
     <div className="p-col-6 p-md-4"> 
    <div className="p-fluid">
     <Card style={{ width: '25rem', height: '15rem', marginBottom: '2em' }}> 
-      { this.state.remotenetworkstatus? <p> Go online before upload </p> : <p> Ready for upload </p>
+      { this.state.localmode? <p> 
+          { this.state.localnetworkstatus? <p> local Go online before upload </p> : <p> local Ready for upload </p>
+          }
+          </p>
+          : 
+          <p>
+          { this.state.remotenetworkstatus? <p> remote Go online before upload </p> : <p> remote Ready for upload </p>
+          }
+          </p>
       } 
       Upload here
       <form id="captureMedia" onSubmit={this.handleSubmit}>
@@ -172,6 +225,12 @@ export default class AddMedia extends React.Component {
       Uploaded status
 
       <p> {this.state.uploadstatus  } </p>
+      <p> {this.state.remotegateway  } </p>
+       <a target='_blank' rel="noopener noreferrer"
+            href={this.state.remotegateway + '/ipfs/' +  this.state.uploadstatus}>
+            Link 
+          </a>
+
 
     </Card> 
       <Card style={{ width: '25rem', height: '15rem', marginBottom: '2em' }}> 
@@ -200,11 +259,11 @@ export default class AddMedia extends React.Component {
 </div>
 <div className="p-field p-grid">
     <div className="p-col p-col-9">
-              {this.state.remotehttptype}
+              {this.state.remoteapi}
     </div>
 
     <div className="p-col-fixed p-col-3">
-        <InputText id="remotegatewayport" type="text" value={this.state.remotegatewayport}  onChange={(e)=>this.setState({remotegatewayport: e.target.value})} />
+        <InputText id="remotegatewayport" type="text" value={this.state.remotegatewayport}  onChange={(e)=> this.setState({remotegatewayport: e.target.value})} />
       <small id="username-gatewayport">Gateway port </small>
     </div>
 
@@ -214,10 +273,10 @@ export default class AddMedia extends React.Component {
     <div className="p-col p-col-1">
     </div>
     <div className="p-col p-col-4">
-       <Button onClick={() => this.setState({ remotehttptype: 'https' }) } className="p-button-text" label="HTTPS" />
+       <Button onClick={() => { this.setState({ remotehttptype: 'https' }); this.createapi(); } } className="p-button-text" label="HTTPS" />
     </div>
     <div className="p-col p-col-4">
-       <Button onClick={() => this.setState({ remotehttptype: 'http' }) } className="p-button-text" label="HTTP" />
+       <Button onClick={() => { this.setState({ remotehttptype: 'http' }); this.createapi(); } } className="p-button-text" label="HTTP" />
 
     </div>
     <div className="p-col p-col-3">
@@ -259,6 +318,7 @@ export default class AddMedia extends React.Component {
 </div>
 <div className="p-field p-grid">
     <div className="p-col p-col-9">
+              {this.state.localapi}
     </div>
 
     <div className="p-col-fixed p-col-3">
@@ -272,10 +332,10 @@ export default class AddMedia extends React.Component {
     <div className="p-col p-col-1">
     </div>
     <div className="p-col p-col-4">
-       <Button onClick={() => this.setState({ httptype: 'https' }) } className="p-button-text" label="HTTPS" />
+       <Button onClick={() => this.setState({ localhttptype: 'https' }) } className="p-button-text" label="HTTPS" />
     </div>
     <div className="p-col p-col-4">
-       <Button onClick={() => this.setState({ httptype: 'http' }) } className="p-button-text" label="HTTP" />
+       <Button onClick={() => this.setState({ localhttptype: 'http' }) } className="p-button-text" label="HTTP" />
 
     </div>
     <div className="p-col p-col-3">
