@@ -14,11 +14,12 @@ const Buffer = require('buffer/').Buffer
 export default class AddMedia extends React.Component {
 
   settingData;
-  storedData;
 
   constructor () {
 
   super();
+   this.updatestorage = this.updatestorage.bind(this);
+   this.savenewipfs = this.savenewipfs.bind(this);
    this.savestate = this.savestate.bind(this);
    this.createapi = this.createapi.bind(this);
    this.onChangeLocalRemote = this.onChangeLocalRemote.bind(this);
@@ -36,6 +37,8 @@ export default class AddMedia extends React.Component {
             localapi: '',
             localgateway: '',
             remotegateway: '',
+            storagedata: [],
+            ipfsfilehash1: '',
             ipfsfilehash: ''
         };
 
@@ -68,7 +71,14 @@ export default class AddMedia extends React.Component {
 
   componentDidMount() {
         this.settingData = JSON.parse(localStorage.getItem('settingdata'));
-        this.storedData = JSON.parse(localStorage.getItem('storeddata'));
+        let storagedata =  JSON.parse(localStorage.getItem('storeddata'));
+
+        if(storagedata && storagedata.length > 0) {
+           this.setState({storagedata, storagedata});
+        }else {
+           let xx = [];
+           this.setState({storagedata, xx});
+        }
 
         if (localStorage.getItem('settingdata')) {
             this.setState({
@@ -103,7 +113,8 @@ export default class AddMedia extends React.Component {
 
   savestate( ) {
     localStorage.setItem('settingdata', JSON.stringify(this.state));
-    localStorage.setItem('storeddata', JSON.stringify(this.storedData));
+    if(this.state.storagedata.length > 0)
+    localStorage.setItem('storeddata', JSON.stringify(this.state.storagedata));
   }
 
   onChangeLocalRemote(e) {
@@ -173,6 +184,7 @@ export default class AddMedia extends React.Component {
       ipfsId = response[0].hash
       console.log(ipfsId)
       this.setState({ uploadstatus: ipfsId  })
+      this.updatestorage({place: 'remote', hash: ipfsId, network: this.state.remotegateway});
     }).catch(err => {
 
       console.log(JSON.stringify(err));
@@ -183,13 +195,43 @@ export default class AddMedia extends React.Component {
     // console.log(this.arrayBufferToString(reader.result))
     let ipfsId
     const buffer = Buffer.from(reader.result)
-    this.state.localipfsApi.add(buffer)
+    let localapi =  IpfsApi(this.state.localapi);
+    localapi.add(buffer)
+    // this.state.localipfsApi.add(buffer)
     .then((response) => {
       ipfsId = response[0].Hash
       console.log(ipfsId)
       this.setState({ uploadstatus: ipfsId  })
+      this.updatestorage({place: 'local', hash: ipfsId, network: this.state.localgateway});
     })
   }
+
+  
+  savenewipfs = (place, hash, network) => {
+    let data = {
+      place: place, hash: hash, network: network
+    }
+ 
+    this.updatestorage(data);
+  }
+
+  updatestorage = (data) => {
+
+    console.log(JSON.stringify(this.state.storagedata));
+
+    let storagedata =  JSON.parse(localStorage.getItem('storeddata'));
+
+    if(!storagedata) { 
+    storagedata = [];
+    storagedata.push(data);
+    this.setState({ storagedata: storagedata  })
+    } else {
+      storagedata.push(data)
+    this.setState({ storagedata: storagedata  })
+    }
+    localStorage.setItem('storeddata', JSON.stringify(this.state.storagedata));
+  }
+
   arrayBufferToString = (arrayBuffer) => {
     return String.fromCharCode.apply(null, new Uint16Array(arrayBuffer))
   }
@@ -234,7 +276,18 @@ export default class AddMedia extends React.Component {
 
     </Card> 
       <Card style={{ width: '25rem', height: '15rem', marginBottom: '2em' }}> 
-      List of files
+      List of files 
+
+      { (this.state.storagedata && this.state.storagedata.length > 0) ? 
+           this.state.storagedata.map((a, index) =>      
+                <div key={'ggggs'+index} >  <h4> {a.place} </h4>  
+            		<a href=""> {a.hash} </a> 
+		</div>
+           )
+          : <p> No files </p>
+       }
+
+ 
       </Card>
     </div>
     </div>
@@ -364,11 +417,21 @@ export default class AddMedia extends React.Component {
   </Card>
 
     <Card style={{ width: '25rem', height: '15rem', marginBottom: '2em' }}> 
+     { this.state.localmode ? 
+          <p> Gateway {this.state.localgateway } </p>
+       :  
+          <p> Gateway {this.state.remotegateway } </p>
+     }
      Enter file hash and save
-        <InputText id="filehashtoshave" type="text" value={this.state.ipfsfilehash} />
+        <InputText id="filehashtoshave" type="text" value={this.state.ipfsfilehash1} onChange={(e)=>this.setState({ipfsfilehash1: e.target.value})} />
       <small id="username-gatewayport">IPFS file hash  </small>
 
-       <Button onClick={() => this.setState({ httptype: 'https' }) } className="p-button-text" label="Save" />
+     { this.state.localmode ? 
+       <Button onClick={() => this.savenewipfs('local', this.state.ipfsfilehash1, this.state.localgateway)  }  className="p-button-text" label="Save" />
+
+      :
+       <Button onClick={() => this.savenewipfs('remote', this.state.ipfsfilehash1, this.state.remotegateway)  } className="p-button-text" label="Save" />
+     }
     </Card>
 
 
