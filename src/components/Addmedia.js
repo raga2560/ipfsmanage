@@ -5,6 +5,7 @@ import React,  { useState } from 'react'
 import IpfsApi from 'ipfs-api'
 import { TabView, TabPanel } from 'primereact/tabview';
 import {InputText} from 'primereact/inputtext';
+import { OrderList } from 'primereact/orderlist';
 import { Button } from 'primereact/button';
 import { Card } from 'primereact/card';
 
@@ -280,8 +281,15 @@ export default class AddMedia extends React.Component {
 
       { (this.state.storagedata && this.state.storagedata.length > 0) ? 
            this.state.storagedata.map((a, index) =>      
-                <div key={'ggggs'+index} >  <h4> {a.place} </h4>  
-            		<a href=""> {a.hash} </a> 
+                <div className="ipfs-item" key={'ggggs'+index} >  
+                    <div className="ipfs-item-detail" > 
+			<small> {index + 1} <a href=""> Link </a> </small>
+                        <p className="ipfs-item-place">  {a.place} </p>
+
+                    </div>  
+                   
+                    <div className="ipfs-item-view" > 
+                    </div>
 		</div>
            )
           : <p> No files </p>

@@ -25,4 +25,25 @@
     background-color: var(--indigo-700);
 }
 
+.ipfs-item {
+    display: flex;
+    text-align: left;
+    align-items: center;
+    padding: .5rem;
+    width: 100%;
+}
 
+.ipfs-item .ipfs-item-detail {
+    flex: 1 1 0;
+}
+
+.ipfs-item .ipfs-item-place {
+  vertical-align: middle;
+    line-height: 1;
+}
+
+.ipfs-item .ipfs-item-view {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
