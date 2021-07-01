@@ -306,15 +306,16 @@ export default class AddMedia extends React.Component {
 
   render () {
     return (
-    <div className="p-grid">
-    <div className="p-md-1"> 
-    </div>
+
+     <div  className="p-d-flex p-flex-column" style={{ marginLeft: '5%', marginRight: '5%', marginTop: '5%'}}> 
 
 
-    <div className="p-col-6 p-md-5"> 
-       <div className="p-fluid">
-        <Card style={{ width: '25rem', height: '20rem', marginBottom: '2em' }}> 
+       <div className="p-mb-2"  >
+     <div  className="p-d-flex p-flex-column p-flex-md-row"> 
+       <div className="p-mb-2 ">
+        <Card style={{ width: '25rem', height: '20rem', margin: '1em' }}> 
          <div className="ipfs-name" >
+     <div className="p-fluid" >
       { this.state.localmode? <p> 
           { this.state.localnetworkstatus? <p> local Go online before upload </p> : <p> local Ready for upload </p>
           }
@@ -325,8 +326,9 @@ export default class AddMedia extends React.Component {
           }
           </p>
       } 
-     </div>
+        </div>
 
+     <div className="p-field" >
       Upload here
       <form id="captureMedia" onSubmit={this.handleSubmit}>
         <input type="file" onChange={this.captureFile} />
@@ -341,9 +343,14 @@ export default class AddMedia extends React.Component {
             Link 
           </a>
 
+      </div>
+    </div>
     </Card> 
 
-    <Card style={{ width: '25rem', height: '16rem', marginBottom: '2em' }}> 
+   </div>
+   <div className="p-mb-2 ">
+    <Card style={{ width: '25rem', height: '20rem', margin: '1em' }}> 
+     <div className="p-fluid" >
      <div className="ipfs-name" >
      { this.state.localmode ? 
           <p> Gateway {this.state.localgateway } </p>
@@ -352,6 +359,7 @@ export default class AddMedia extends React.Component {
      }
     </div>
 
+     <div className="p-field" >
      Enter file 
         <InputText id="filename" type="text" value={this.state.ipfsfilename} onChange={(e)=>this.setState({ipfsfilename: e.target.value})} />
       <small id="ipfs-filename">IPFS file name  </small>
@@ -364,33 +372,21 @@ export default class AddMedia extends React.Component {
       :
        <Button onClick={() => this.savenewipfs('remote', this.state.ipfsfilehash1, this.state.remotegateway)  } className="p-button-text" label="Save" />
      }
+      </div>
+    </div>
     </Card>
-
-   <div className="card">
-                    <h5>Basic Cell Editing</h5>
-                    <DataTable value={this.state.storagedata} editMode="cell" className="editable-cells-table">
-                        <Column field="hash" header="Hash" body={this.hashBodytemplate} ></Column>
-                        <Column field="place" header="Place" editor={(props) => this.nameEditor('products1', props)}></Column>
-                        <Column field="name" header="Name" editor={(props) => this.nameEditor('storage', props)}></Column>
-                        <Column field="link" header="Link" ></Column>
-                    </DataTable>
-                </div>
+   </div>
 
 
- 
-    </div>
-    </div>
-
-
-
-    <div className="p-col-6 p-md-6">
-     <div className="p-fluid">
-       <Card style={{ width: '25rem', height: '25rem',  marginBottom: '2em' }}> 
+   <div className="p-mb-2 ">
+      
+       <Card style={{ width: '25rem', height: '25rem',  margin: '1em' }}> 
        <div className="tabview-demo">
 
        <TabView activeIndex={this.state.activeIndex} onTabChange={(e) => this.onChangeLocalRemote(e)}>
 
        <TabPanel header="Remote node ">
+       <div className="p-fluid ">
        <div className="p-field p-grid">
         <div className="p-col p-col-9">
         <InputText id="remoteipaddress" type="text" value={this.state.remoteipaddress} onChange={(e) => this.onChangeRemoteipaddress(e) } />
@@ -444,9 +440,11 @@ export default class AddMedia extends React.Component {
       <div className="p-col p-col-3">
       </div>
    </div>
+   </div>
 
     </TabPanel>
     <TabPanel header="Local node ">
+      <div className="p-fluid ">
       <div className="p-field p-grid">
        <div className="p-col p-col-9">
         <InputText id="localipaddress" type="text" value={this.state.localipaddress} onChange={(e) => this.onChangeLocalipaddress(e) } />
@@ -500,6 +498,7 @@ export default class AddMedia extends React.Component {
        <Button onClick={() => this.savestate()  } className="p-button-text" label="Save" />
     </div>
     </div>
+    </div>
 
 
     </TabPanel>
@@ -509,11 +508,29 @@ export default class AddMedia extends React.Component {
   </Card>
 
    </div>
+   </div>
+   </div>
+
+   <div className="p-mb-2 " >
+
+   <div className="card">
+                    <h5>IPFS files </h5>
+                    <DataTable value={this.state.storagedata} editMode="cell" className="editable-cells-table">
+                        <Column field="hash" header="Hash" body={this.hashBodytemplate} ></Column>
+                        <Column field="place" header="Place" editor={(props) => this.nameEditor('products1', props)}></Column>
+                        <Column field="name" header="Name" editor={(props) => this.nameEditor('storage', props)}></Column>
+                        <Column field="link" header="Link" ></Column>
+                    </DataTable>
+                </div>
 
 
-   yyyyyy
+ 
     </div>
-  zzzzz
+   <div className="p-mb-2 " style={{ height:'290px'}} >
+    <p> END  </p>    
+    </div>
+
+
 </div>
    
     )
