@@ -1,0 +1,59 @@
+.tabview-demo .tabview-custom i, .tabview-demo .tabview-custom span {
+    vertical-align: middle;
+}
+
+.tabview-demo .tabview-custom span {
+    margin: 0 .5rem;
+}
+
+.tabview-demo .p-button {
+    margin-right: .25rem;
+}
+
+.tabview-demo .p-tabview p {
+    line-height: 1.5;
+    margin: 0;
+}
+
+.p-button {
+    margin-right: 0.5rem;
+    text-align: center;
+    box-shadow: 0 0 0 1px var(--green-400);
+}
+
+.p-button:focus {
+    background-color: var(--indigo-700);
+}
+
+.ipfs-item {
+    display: flex;
+    text-align: left;
+    align-items: center;
+    padding: .5rem;
+    width: 100%;
+}
+
+.ipfs-item .ipfs-item-detail {
+    flex: 1 1 0;
+}
+
+.ipfs-item .ipfs-item-place {
+  vertical-align: middle;
+    line-height: 1;
+    font-size: 0.8em;
+}
+
+.ipfs-item .ipfs-item-view {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.ipfs-name {
+   text-align: left;
+}
+
+.editable-cells-table td.p-cell-editing {
+    padding-top: 0;
+    padding-bottom: 0;
+}
